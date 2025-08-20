@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GMB TEST - اختبار الكثافة الظاهرية للأسفلت</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#00685E',
+                        secondary: '#8BAA99',
+                        dark: '#101820',
+                        accent1: '#F2C75C',
+                        accent2: '#E59256',
+                        accent3: '#A13525',
+                        accent4: '#006797',
+                        accent5: '#00A399',
+                        accent6: '#B98346'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        
+        body { 
+            font-family: 'Cairo', sans-serif; 
+        }
+        
+        body.en {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .no-print { display: block; }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { font-size: 12px; }
+        }
+        .print-only { display: none; }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #00685E 0%, #8BAA99 100%);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 104, 94, 0.15);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 min-h-screen transition-all duration-300">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <div class="gradient-bg rounded-xl shadow-lg p-8 mb-8 text-white">
+            <div class="flex justify-between items-start mb-4">
+                <div class="text-center flex-1">
+                    <h1 class="text-4xl font-bold mb-2" data-en="GMB TEST" data-ar="GMB TEST">GMB TEST</h1>
+                    <p class="text-white/80" data-en="Asphalt Bulk Density Test" data-ar="اختبار الكثافة الظاهرية للأسفلت">اختبار الكثافة الظاهرية للأسفلت</p>
+                </div>
+                <button onclick="toggleLanguage()" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium">
+                    <span data-en="العربية" data-ar="English">English</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Project Information Form -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8 card-hover border-l-4 border-primary">
+            <h2 class="text-2xl font-semibold mb-6 text-dark dark:text-white flex items-center">
+                <div class="w-3 h-3 bg-primary rounded-full mr-3"></div>
+                <span data-en="Project Information" data-ar="معلومات المشروع">معلومات المشروع</span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-en="Project Name" data-ar="اسم المشروع">اسم المشروع</label>
+                    <input type="text" id="projectName" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:border-primary text-base dark:bg-gray-700 dark:text-white transition-all duration-200" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-en="Contractor Name" data-ar="اسم المقاول">اسم المقاول</label>
+                    <input type="text" id="contractorName" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:border-primary text-base dark:bg-gray-700 dark:text-white transition-all duration-200" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-en="Layer Type" data-ar="نوع الطبقة">نوع الطبقة</label>
+                    <select id="layerType" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:border-primary text-base dark:bg-gray-700 dark:text-white transition-all duration-200" required>
+                        <option value="" data-en="Select Layer Type" data-ar="اختر نوع الطبقة">اختر نوع الطبقة</option>
+                        <option value="B.W.C">B.W.C</option>
+                        <option value="B.B.C">B.B.C</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-en="Test Date" data-ar="تاريخ الاختبار">تاريخ الاختبار</label>
+                    <input type="date" id="testDate" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:border-primary text-base dark:bg-gray-700 dark:text-white transition-all duration-200" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-en="Minimum Pass Rate (%)" data-ar="الحد الأدنى لنسبة النجاح (%)">الحد الأدنى لنسبة النجاح (%)</label>
+                    <input type="number" step="0.1" id="minPassRate" value="91" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:border-primary text-base dark:bg-gray-700 dark:text-white transition-all duration-200" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-en="Maximum Pass Rate (%)" data-ar="الحد الأقصى لنسبة النجاح (%)">الحد الأقصى لنسبة النجاح (%)</label>
+                    <input type="number" step="0.1" id="maxPassRate" value="94" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:border-primary text-base dark:bg-gray-700 dark:text-white transition-all duration-200" required>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sample Input Form -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8 card-hover border-l-4 border-secondary">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-semibold text-dark dark:text-white flex items-center">
+                    <div class="w-3 h-3 bg-secondary rounded-full mr-3"></div>
+                    <span data-en="Sample Data Entry" data-ar="إدخال بيانات العينات">إدخال بيانات العينات</span>
+                </h2>
+                <div class="bg-accent1/10 text-accent6 px-4 py-2 rounded-lg text-sm font-medium">
+                    <span data-en="Samples Added:" data-ar="العينات المضافة:">العينات المضافة:</span> <span id="sampleCount">0</span>/50
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-en="Sample Name" data-ar="اسم العينة">اسم العينة</label>
+                    <input type="text" id="sampleName" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:border-primary text-base dark:bg-gray-700 dark:text-white transition-all duration-200" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-en="Average Core Thickness (cm)" data-ar="متوسط سمك الكور (cm)">متوسط سمك الكور (cm)</label>
+                    <input type="number" step="0.1" id="coreThickness" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:border-primary text-base dark:bg-gray-700 dark:text-white transition-all duration-200" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-en="Weight in Air (g)" data-ar="وزن العينة في الهواء (g)">وزن العينة في الهواء (g)</label>
+                    <input type="number" step="0.1" id="weightInAir" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:border-primary text-base dark:bg-gray-700 dark:text-white transition-all duration-200" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-en="Weight in Water (g)" data-ar="وزن العينة في الماء (g)">وزن العينة في الماء (g)</label>
+                    <input type="number" step="0.1" id="weightInWater" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:border-primary text-base dark:bg-gray-700 dark:text-white transition-all duration-200" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-en="Saturated Surface Weight (g)" data-ar="وزن العينة مشبعة السطح (g)">وزن العينة مشبعة السطح (g)</label>
+                    <input type="number" step="0.1" id="saturatedWeight" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:border-primary text-base dark:bg-gray-700 dark:text-white transition-all duration-200" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-en="Gmm Test Result" data-ar="نتيجة اختبار Gmm">نتيجة اختبار Gmm</label>
+                    <input type="number" step="0.001" id="gmmResult" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:border-primary text-base dark:bg-gray-700 dark:text-white transition-all duration-200" required>
+                </div>
+            </div>
+            
+            <button onclick="addSample()" class="w-full bg-gradient-to-r from-primary to-secondary text-white py-4 px-6 rounded-lg hover:from-primary/90 hover:to-secondary/90 transition-all duration-200 font-medium text-lg shadow-lg">
+                <span data-en="Add Sample" data-ar="إضافة العينة">إضافة العينة</span>
+            </button>
+        </div>
+
+        <!-- Results Table -->
+        <div id="resultsSection" class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8 card-hover border-l-4 border-accent5" style="display: none;">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-semibold text-dark dark:text-white flex items-center">
+                    <div class="w-3 h-3 bg-accent5 rounded-full mr-3"></div>
+                    <span data-en="Test Results" data-ar="نتائج الاختبارات">نتائج الاختبارات</span>
+                </h2>
+                <div class="no-print flex gap-3">
+                    <button onclick="printResults()" class="bg-accent4 text-white px-6 py-3 rounded-lg hover:bg-accent4/90 transition-all duration-200 font-medium shadow-md">
+                        <span data-en="Print" data-ar="طباعة">طباعة</span>
+                    </button>
+                    <button onclick="exportToExcel()" class="bg-accent6 text-white px-6 py-3 rounded-lg hover:bg-accent6/90 transition-all duration-200 font-medium shadow-md">
+                        <span data-en="Export Excel" data-ar="تصدير Excel">تصدير Excel</span>
+                    </button>
+                    <button onclick="exportToPDF()" class="bg-accent3 text-white px-6 py-3 rounded-lg hover:bg-accent3/90 transition-all duration-200 font-medium shadow-md">
+                        <span data-en="Export PDF" data-ar="تصدير PDF">تصدير PDF</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Project Info for Print -->
+            <div class="print-only mb-6">
+                <h1 class="text-2xl font-bold text-center mb-4">GMB TEST - Asphalt Bulk Density Test</h1>
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div><strong>Project Name:</strong> <span id="printProjectName"></span></div>
+                    <div><strong>Contractor Name:</strong> <span id="printContractorName"></span></div>
+                    <div><strong>Layer Type:</strong> <span id="printLayerType"></span></div>
+                    <div><strong>Test Date:</strong> <span id="printTestDate"></span></div>
+                </div>
+                <hr class="my-4">
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm border-collapse">
+                    <thead class="bg-gradient-to-r from-primary/10 to-secondary/10">
+                        <tr id="tableHeader">
+                            <th class="px-3 py-4 text-center text-xs font-bold text-dark dark:text-gray-300 uppercase tracking-wider border-2 border-gray-200 dark:border-gray-600" data-en="Sample Name" data-ar="اسم العينة">اسم العينة</th>
+                            <th class="px-3 py-4 text-center text-xs font-bold text-dark dark:text-gray-300 uppercase tracking-wider border-2 border-gray-200 dark:border-gray-600" data-en="Core Thickness (cm)" data-ar="سمك الكور (cm)">سمك الكور (cm)</th>
+                            <th class="px-3 py-4 text-center text-xs font-bold text-dark dark:text-gray-300 uppercase tracking-wider border-2 border-gray-200 dark:border-gray-600" data-en="Weight in Air (g)" data-ar="وزن في الهواء (g)">وزن في الهواء (g)</th>
+                            <th class="px-3 py-4 text-center text-xs font-bold text-dark dark:text-gray-300 uppercase tracking-wider border-2 border-gray-200 dark:border-gray-600" data-en="Weight in Water (g)" data-ar="وزن في الماء (g)">وزن في الماء (g)</th>
+                            <th class="px-3 py-4 text-center text-xs font-bold text-dark dark:text-gray-300 uppercase tracking-wider border-2 border-gray-200 dark:border-gray-600" data-en="Saturated Weight (g)" data-ar="وزن مشبع السطح (g)">وزن مشبع السطح (g)</th>
+                            <th class="px-3 py-4 text-center text-xs font-bold text-dark dark:text-gray-300 uppercase tracking-wider border-2 border-gray-200 dark:border-gray-600" data-en="Sample Volume (cm³)" data-ar="حجم العينة (cm³)">حجم العينة (cm³)</th>
+                            <th class="px-3 py-4 text-center text-xs font-bold text-dark dark:text-gray-300 uppercase tracking-wider border-2 border-gray-200 dark:border-gray-600" data-en="Sample Density (GMB)" data-ar="كثافة العينة (GMB)">كثافة العينة (GMB)</th>
+                            <th class="px-3 py-4 text-center text-xs font-bold text-dark dark:text-gray-300 uppercase tracking-wider border-2 border-gray-200 dark:border-gray-600" data-en="Gmm Result" data-ar="نتيجة Gmm">نتيجة Gmm</th>
+                            <th class="px-3 py-4 text-center text-xs font-bold text-dark dark:text-gray-300 uppercase tracking-wider border-2 border-gray-200 dark:border-gray-600" data-en="Compaction Ratio (%)" data-ar="نسبة الدمك (%)">نسبة الدمك (%)</th>
+                            <th class="px-3 py-4 text-center text-xs font-bold text-dark dark:text-gray-300 uppercase tracking-wider border-2 border-gray-200 dark:border-gray-600" data-en="Result" data-ar="النتيجة">النتيجة</th>
+                            <th class="px-3 py-4 text-center text-xs font-bold text-dark dark:text-gray-300 uppercase tracking-wider border-2 border-gray-200 dark:border-gray-600 no-print" data-en="Actions" data-ar="إجراءات">إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsTableBody" class="bg-white dark:bg-gray-800">
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                <div class="bg-gradient-to-br from-accent4/10 to-accent4/5 border border-accent4/20 p-6 rounded-xl">
+                    <div class="text-3xl font-bold text-accent4 mb-2" id="totalSamples">0</div>
+                    <div class="text-sm text-accent4 font-medium" data-en="Total Samples" data-ar="إجمالي العينات">إجمالي العينات</div>
+                </div>
+                <div class="bg-gradient-to-br from-accent5/10 to-accent5/5 border border-accent5/20 p-6 rounded-xl">
+                    <div class="text-3xl font-bold text-accent5 mb-2" id="passedSamples">0</div>
+                    <div class="text-sm text-accent5 font-medium" data-en="Passed Samples" data-ar="عينات ناجحة">عينات ناجحة</div>
+                </div>
+                <div class="bg-gradient-to-br from-accent3/10 to-accent3/5 border border-accent3/20 p-6 rounded-xl">
+                    <div class="text-3xl font-bold text-accent3 mb-2" id="failedSamples">0</div>
+                    <div class="text-sm text-accent3 font-medium" data-en="Failed Samples" data-ar="عينات راسبة">عينات راسبة</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Modal for Confirmations -->
+    <div id="confirmModal" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm" style="display: none;">
+        <div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-2xl max-w-md w-full mx-4 border border-gray-200 dark:border-gray-700">
+            <p id="confirmMessage" class="text-gray-700 dark:text-gray-300 mb-6 text-center text-lg"></p>
+            <div class="flex justify-center space-x-4 gap-4">
+                <button id="confirmCancel" class="px-6 py-3 text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-all duration-200 font-medium" data-en="Cancel" data-ar="إلغاء">إلغاء</button>
+                <button id="confirmOk" class="px-6 py-3 bg-accent3 text-white hover:bg-accent3/90 rounded-lg transition-all duration-200 font-medium" data-en="Confirm" data-ar="تأكيد">تأكيد</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Alert Modal -->
+    <div id="alertModal" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm" style="display: none;">
+        <div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-2xl max-w-md w-full mx-4 border border-gray-200 dark:border-gray-700">
+            <p id="alertMessage" class="text-gray-700 dark:text-gray-300 mb-6 text-center text-lg"></p>
+            <div class="flex justify-center">
+                <button id="alertOk" class="px-6 py-3 bg-primary text-white hover:bg-primary/90 rounded-lg transition-all duration-200 font-medium" data-en="OK" data-ar="موافق">موافق</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Language and Dark mode setup
+        let currentLanguage = 'ar';
+        let samples = [];
+
+        // Translation object
+        const translations = {
+            ar: {
+                pass: 'ناجح',
+                fail: 'راسب',
+                delete: 'حذف',
+                confirmDelete: 'هل أنت متأكد من حذف هذه العينة؟',
+                maxSamples: 'لا يمكن إضافة أكثر من 50 عينة',
+                completeProject: 'يرجى إكمال جميع معلومات المشروع أولاً',
+                completeSample: 'يرجى إكمال جميع بيانات العينة',
+                duplicateName: 'اسم العينة موجود مسبقاً، يرجى اختيار اسم مختلف',
+                noSamples: 'لا توجد عينات للتصدير'
+            },
+            en: {
+                pass: 'Pass',
+                fail: 'Fail', 
+                delete: 'Delete',
+                confirmDelete: 'Are you sure you want to delete this sample?',
+                maxSamples: 'Cannot add more than 50 samples',
+                completeProject: 'Please complete all project information first',
+                completeSample: 'Please complete all sample data',
+                duplicateName: 'Sample name already exists, please choose a different name',
+                noSamples: 'No samples to export'
+            }
+        };
+
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+
+        function toggleLanguage() {
+            currentLanguage = currentLanguage === 'ar' ? 'en' : 'ar';
+            
+            if (currentLanguage === 'en') {
+                document.documentElement.setAttribute('lang', 'en');
+                document.documentElement.setAttribute('dir', 'ltr');
+                document.body.classList.add('en');
+            } else {
+                document.documentElement.setAttribute('lang', 'ar');
+                document.documentElement.setAttribute('dir', 'rtl');
+                document.body.classList.remove('en');
+            }
+            
+            updateLanguageContent();
+            updateResultsTable();
+        }
+
+        function updateLanguageContent() {
+            const elements = document.querySelectorAll('[data-en][data-ar]');
+            elements.forEach(element => {
+                if (currentLanguage === 'en') {
+                    element.textContent = element.getAttribute('data-en');
+                } else {
+                    element.textContent = element.getAttribute('data-ar');
+                }
+            });
+            
+            // Update placeholder for select option
+            const layerSelect = document.getElementById('layerType');
+            const selectOption = layerSelect.querySelector('option[value=""]');
+            if (selectOption) {
+                selectOption.textContent = currentLanguage === 'en' ? 'Select Layer Type' : 'اختر نوع الطبقة';
+            }
+        }
+
+        // Custom modal functions
+        function showAlert(messageKey) {
+            const message = translations[currentLanguage][messageKey] || messageKey;
+            document.getElementById('alertMessage').textContent = message;
+            document.getElementById('alertModal').style.display = 'flex';
+        }
+
+        function showConfirm(messageKey, callback) {
+            const message = translations[currentLanguage][messageKey] || messageKey;
+            document.getElementById('confirmMessage').textContent = message;
+            document.getElementById('confirmModal').style.display = 'flex';
+            
+            document.getElementById('confirmOk').onclick = () => {
+                document.getElementById('confirmModal').style.display = 'none';
+                callback();
+            };
+            
+            document.getElementById('confirmCancel').onclick = () => {
+                document.getElementById('confirmModal').style.display = 'none';
+            };
+        }
+
+        document.getElementById('alertOk').onclick = () => {
+            document.getElementById('alertModal').style.display = 'none';
+        };
+
+        function addSample() {
+            if (samples.length >= 50) {
+                showAlert('maxSamples');
+                return;
+            }
+
+            // Validate project information
+            const projectName = document.getElementById('projectName').value.trim();
+            const contractorName = document.getElementById('contractorName').value.trim();
+            const layerType = document.getElementById('layerType').value;
+            const testDate = document.getElementById('testDate').value;
+            const minPassRate = parseFloat(document.getElementById('minPassRate').value);
+            const maxPassRate = parseFloat(document.getElementById('maxPassRate').value);
+
+            if (!projectName || !contractorName || !layerType || !testDate || isNaN(minPassRate) || isNaN(maxPassRate)) {
+                showAlert('completeProject');
+                return;
+            }
+
+            // Validate pass rate range
+            if (minPassRate >= maxPassRate) {
+                showAlert(currentLanguage === 'ar' ? 'الحد الأدنى يجب أن يكون أقل من الحد الأقصى' : 'Minimum rate must be less than maximum rate');
+                return;
+            }
+
+            // Get sample data
+            const sampleName = document.getElementById('sampleName').value.trim();
+            const coreThickness = parseFloat(document.getElementById('coreThickness').value);
+            const weightInAir = parseFloat(document.getElementById('weightInAir').value);
+            const weightInWater = parseFloat(document.getElementById('weightInWater').value);
+            const saturatedWeight = parseFloat(document.getElementById('saturatedWeight').value);
+            const gmmResult = parseFloat(document.getElementById('gmmResult').value);
+
+            // Validate sample data
+            if (!sampleName || isNaN(coreThickness) || isNaN(weightInAir) || isNaN(weightInWater) || isNaN(saturatedWeight) || isNaN(gmmResult)) {
+                showAlert('completeSample');
+                return;
+            }
+
+            // Check if sample name already exists
+            if (samples.some(sample => sample.name === sampleName)) {
+                showAlert('duplicateName');
+                return;
+            }
+
+            // Calculate volume and density
+            const volume = saturatedWeight - weightInWater;
+            const density = weightInAir / volume;
+            const compactionRatio = (density / gmmResult) * 100;
+            const result = (compactionRatio >= minPassRate && compactionRatio <= maxPassRate) ? 'pass' : 'fail';
+
+            // Add sample to array
+            const sample = {
+                name: sampleName,
+                coreThickness,
+                weightInAir,
+                weightInWater,
+                saturatedWeight,
+                volume: volume.toFixed(2),
+                density: density.toFixed(3),
+                gmmResult,
+                compactionRatio: compactionRatio.toFixed(2),
+                result
+            };
+
+            samples.push(sample);
+            updateResultsTable();
+            clearSampleForm();
+            updateSampleCount();
+            
+            // Show results section
+            document.getElementById('resultsSection').style.display = 'block';
+        }
+
+        function clearSampleForm() {
+            document.getElementById('sampleName').value = '';
+            document.getElementById('coreThickness').value = '';
+            document.getElementById('weightInAir').value = '';
+            document.getElementById('weightInWater').value = '';
+            document.getElementById('saturatedWeight').value = '';
+            document.getElementById('gmmResult').value = '';
+        }
+
+        function updateSampleCount() {
+            document.getElementById('sampleCount').textContent = samples.length;
+        }
+
+        function updateResultsTable() {
+            const tbody = document.getElementById('resultsTableBody');
+            tbody.innerHTML = '';
+
+            samples.forEach((sample, index) => {
+                const row = tbody.insertRow();
+                const resultText = translations[currentLanguage][sample.result];
+                const resultClass = sample.result === 'pass' ? 'text-accent5' : 'text-accent3';
+                const deleteText = translations[currentLanguage]['delete'];
+                
+                row.innerHTML = `
+                    <td class="px-3 py-4 whitespace-nowrap text-center border-2 border-gray-200 dark:border-gray-600">${sample.name}</td>
+                    <td class="px-3 py-4 whitespace-nowrap text-center border-2 border-gray-200 dark:border-gray-600">${sample.coreThickness}</td>
+                    <td class="px-3 py-4 whitespace-nowrap text-center border-2 border-gray-200 dark:border-gray-600">${sample.weightInAir}</td>
+                    <td class="px-3 py-4 whitespace-nowrap text-center border-2 border-gray-200 dark:border-gray-600">${sample.weightInWater}</td>
+                    <td class="px-3 py-4 whitespace-nowrap text-center border-2 border-gray-200 dark:border-gray-600">${sample.saturatedWeight}</td>
+                    <td class="px-3 py-4 whitespace-nowrap text-center border-2 border-gray-200 dark:border-gray-600">${sample.volume}</td>
+                    <td class="px-3 py-4 whitespace-nowrap text-center border-2 border-gray-200 dark:border-gray-600">${sample.density}</td>
+                    <td class="px-3 py-4 whitespace-nowrap text-center border-2 border-gray-200 dark:border-gray-600">${sample.gmmResult}</td>
+                    <td class="px-3 py-4 whitespace-nowrap text-center border-2 border-gray-200 dark:border-gray-600">${sample.compactionRatio}%</td>
+                    <td class="px-3 py-4 whitespace-nowrap text-center border-2 border-gray-200 dark:border-gray-600 font-bold ${resultClass}">${resultText}</td>
+                    <td class="px-3 py-4 whitespace-nowrap text-center border-2 border-gray-200 dark:border-gray-600 no-print">
+                        <button onclick="deleteSample(${index})" class="text-accent3 hover:text-accent3/80 font-medium transition-all duration-200">
+                            ${deleteText}
+                        </button>
+                    </td>
+                `;
+            });
+
+            updateStatistics();
+        }
+
+        function updateStatistics() {
+            const total = samples.length;
+            const passed = samples.filter(sample => sample.result === 'pass').length;
+            const failed = total - passed;
+
+            document.getElementById('totalSamples').textContent = total;
+            document.getElementById('passedSamples').textContent = passed;
+            document.getElementById('failedSamples').textContent = failed;
+        }
+
+        function deleteSample(index) {
+            showConfirm('confirmDelete', () => {
+                samples.splice(index, 1);
+                updateResultsTable();
+                updateSampleCount();
+                
+                if (samples.length === 0) {
+                    document.getElementById('resultsSection').style.display = 'none';
+                }
+            });
+        }
+
+        function printResults() {
+            // Update print elements
+            document.getElementById('printProjectName').textContent = document.getElementById('projectName').value;
+            document.getElementById('printContractorName').textContent = document.getElementById('contractorName').value;
+            document.getElementById('printLayerType').textContent = document.getElementById('layerType').value;
+            document.getElementById('printTestDate').textContent = document.getElementById('testDate').value;
+            
+            window.print();
+        }
+
+        function exportToExcel() {
+            if (samples.length === 0) {
+                showAlert('noSamples');
+                return;
+            }
+
+            const headers = currentLanguage === 'en' ? 
+                ['Sample Name', 'Core Thickness (cm)', 'Weight in Air (g)', 'Weight in Water (g)', 'Saturated Weight (g)', 'Sample Volume (cm³)', 'Sample Density (GMB)', 'Gmm Result', 'Compaction Ratio (%)', 'Result'] :
+                ['اسم العينة', 'سمك الكور (cm)', 'وزن في الهواء (g)', 'وزن في الماء (g)', 'وزن مشبع السطح (g)', 'حجم العينة (cm³)', 'كثافة العينة (GMB)', 'نتيجة Gmm', 'نسبة الدمك (%)', 'النتيجة'];
+
+            const projectLabels = currentLanguage === 'en' ?
+                ['Project Name', 'Contractor Name', 'Layer Type', 'Test Date'] :
+                ['اسم المشروع', 'اسم المقاول', 'نوع الطبقة', 'تاريخ الاختبار'];
+
+            const projectInfo = [
+                [projectLabels[0], document.getElementById('projectName').value],
+                [projectLabels[1], document.getElementById('contractorName').value],
+                [projectLabels[2], document.getElementById('layerType').value],
+                [projectLabels[3], document.getElementById('testDate').value],
+                [''], // Empty row
+                headers
+            ];
+
+            const sampleData = samples.map(sample => [
+                sample.name,
+                sample.coreThickness,
+                sample.weightInAir,
+                sample.weightInWater,
+                sample.saturatedWeight,
+                sample.volume,
+                sample.density,
+                sample.gmmResult,
+                sample.compactionRatio,
+                translations[currentLanguage][sample.result]
+            ]);
+
+            const ws_data = [...projectInfo, ...sampleData];
+            const ws = XLSX.utils.aoa_to_sheet(ws_data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "GMB Test Results");
+            
+            XLSX.writeFile(wb, `GMB_Test_Results_${document.getElementById('testDate').value}.xlsx`);
+        }
+
+        function exportToPDF() {
+            if (samples.length === 0) {
+                showAlert('noSamples');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape'); // Use landscape orientation for better table fit
+            
+            // Set font
+            doc.setFont("helvetica");
+            
+            // Title
+            doc.setFontSize(18);
+            doc.text('GMB TEST - Asphalt Bulk Density Test', 148, 20, { align: 'center' });
+            
+            // Project info box
+            doc.setFontSize(10);
+            doc.setDrawColor(0, 104, 94); // Primary color
+            doc.setLineWidth(0.5);
+            doc.rect(20, 30, 256, 35); // Rectangle for project info
+            
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "bold");
+            doc.text('Project Information:', 25, 40);
+            
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(10);
+            let y = 48;
+            doc.text(`Project Name: ${document.getElementById('projectName').value}`, 25, y);
+            doc.text(`Test Date: ${document.getElementById('testDate').value}`, 160, y);
+            y += 8;
+            doc.text(`Contractor Name: ${document.getElementById('contractorName').value}`, 25, y);
+            doc.text(`Layer Type: ${document.getElementById('layerType').value}`, 160, y);
+            y += 8;
+            doc.text(`Pass Rate Range: ${document.getElementById('minPassRate').value}% - ${document.getElementById('maxPassRate').value}%`, 25, y);
+            
+            // Results summary
+            y = 75;
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(12);
+            doc.text('Test Results Summary:', 25, y);
+            
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(10);
+            y += 10;
+            const totalSamples = samples.length;
+            const passedSamples = samples.filter(s => s.result === 'pass').length;
+            const failedSamples = totalSamples - passedSamples;
+            const passPercentage = totalSamples > 0 ? ((passedSamples / totalSamples) * 100).toFixed(1) : 0;
+            
+            doc.text(`Total Samples: ${totalSamples}`, 25, y);
+            doc.text(`Passed Samples: ${passedSamples} (${passPercentage}%)`, 120, y);
+            doc.text(`Failed Samples: ${failedSamples}`, 220, y);
+            
+            // Table header
+            y = 100;
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(8);
+            doc.setFillColor(0, 104, 94); // Primary color
+            doc.setTextColor(255, 255, 255); // White text
+            
+            // Define column widths and positions
+            const colWidths = [25, 20, 22, 22, 25, 20, 22, 18, 25, 18, 18];
+            const colPositions = [20];
+            for (let i = 1; i < colWidths.length; i++) {
+                colPositions[i] = colPositions[i-1] + colWidths[i-1];
+            }
+            
+            // Draw header
+            const headerHeight = 12;
+            doc.rect(20, y, 235, headerHeight, 'F'); // Filled rectangle for header
+            
+            const headers = [
+                'Sample Name',
+                'Core Thickness (cm)',
+                'Weight in Air (g)',
+                'Weight in Water (g)',
+                'Saturated Weight (g)',
+                'Volume (cm³)',
+                'Density (GMB)',
+                'Gmm Result',
+                'Compaction Ratio (%)',
+                'Result',
+                'Status'
+            ];
+            
+            headers.forEach((header, index) => {
+                // Center text in column
+                const textWidth = doc.getTextWidth(header);
+                const centerX = colPositions[index] + (colWidths[index] / 2) - (textWidth / 2);
+                doc.text(header, centerX, y + 8);
+            });
+            
+            // Table data
+            doc.setTextColor(0, 0, 0); // Black text
+            doc.setFont("helvetica", "normal");
+            y += headerHeight;
+            
+            samples.forEach((sample, index) => {
+                // Check if we need a new page
+                if (y > 180) {
+                    doc.addPage('landscape');
+                    y = 30;
+                    
+                    // Redraw header on new page
+                    doc.setFont("helvetica", "bold");
+                    doc.setFillColor(0, 104, 94);
+                    doc.setTextColor(255, 255, 255);
+                    doc.rect(20, y, 235, headerHeight, 'F');
+                    
+                    headers.forEach((header, index) => {
+                        const textWidth = doc.getTextWidth(header);
+                        const centerX = colPositions[index] + (colWidths[index] / 2) - (textWidth / 2);
+                        doc.text(header, centerX, y + 8);
+                    });
+                    
+                    doc.setTextColor(0, 0, 0);
+                    doc.setFont("helvetica", "normal");
+                    y += headerHeight;
+                }
+                
+                const rowHeight = 10;
+                
+                // Alternate row colors
+                if (index % 2 === 0) {
+                    doc.setFillColor(248, 249, 250); // Light gray
+                    doc.rect(20, y, 235, rowHeight, 'F');
+                }
+                
+                // Row data
+                const rowData = [
+                    sample.name,
+                    sample.coreThickness.toString(),
+                    sample.weightInAir.toString(),
+                    sample.weightInWater.toString(),
+                    sample.saturatedWeight.toString(),
+                    sample.volume,
+                    sample.density,
+                    sample.gmmResult.toString(),
+                    sample.compactionRatio + '%',
+                    sample.result === 'pass' ? 'Pass' : 'Fail',
+                    sample.result === 'pass' ? '✓' : '✗'
+                ];
+                
+                // Set color for result column
+                rowData.forEach((data, colIndex) => {
+                    if (colIndex === 9 || colIndex === 10) { // Result and Status columns
+                        if (sample.result === 'pass') {
+                            doc.setTextColor(0, 163, 153); // Green
+                        } else {
+                            doc.setTextColor(161, 53, 37); // Red
+                        }
+                    } else {
+                        doc.setTextColor(0, 0, 0); // Black
+                    }
+                    
+                    // Center text in column
+                    const textWidth = doc.getTextWidth(data);
+                    const centerX = colPositions[colIndex] + (colWidths[colIndex] / 2) - (textWidth / 2);
+                    doc.text(data, centerX, y + 7);
+                });
+                
+                // Draw row border
+                doc.setDrawColor(200, 200, 200);
+                doc.setLineWidth(0.1);
+                doc.rect(20, y, 235, rowHeight);
+                
+                // Draw column separators
+                for (let i = 1; i < colPositions.length; i++) {
+                    doc.line(colPositions[i], y, colPositions[i], y + rowHeight);
+                }
+                
+                y += rowHeight;
+            });
+            
+            // Footer
+            const pageCount = doc.internal.getNumberOfPages();
+            doc.setTextColor(100, 100, 100);
+            doc.setFontSize(8);
+            
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.text(`Generated on: ${new Date().toLocaleString()}`, 20, 200);
+                doc.text(`Page ${i} of ${pageCount}`, 250, 200);
+            }
+            
+            doc.save(`GMB_Test_Results_${document.getElementById('testDate').value}.pdf`);
+        }
+
+        // Set today's date as default
+        document.getElementById('testDate').value = new Date().toISOString().split('T')[0];
+
+        // Initialize language content
+        updateLanguageContent();
+    </script>
+</body>
+</html>
